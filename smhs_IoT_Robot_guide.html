@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>smhs_IoT_Robot 課程說明文件</title>
+  <style>
+    :root {
+      --bg:       #f5f7fa;
+      --surface:  #ffffff;
+      --border:   #e0e6ed;
+      --text:     #2d3748;
+      --muted:    #718096;
+      --accent:   #3498db;
+      --accent2:  #2ecc71;
+      --warn:     #e74c3c;
+      --code-bg:  #2c3e50;
+      --code-fg:  #ecf0f1;
+      --tag-blue: #ebf5fb;
+      --tag-green:#eafaf1;
+      --tag-red:  #fdedec;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', '微軟正黑體', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── 側邊欄 ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 240px; height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 20px 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      font-size: 15px; font-weight: 700;
+      color: var(--accent);
+      padding: 0 20px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .sidebar-logo span { display: block; font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+    .nav-section { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+                   letter-spacing: .05em; padding: 12px 20px 4px; }
+    .sidebar a {
+      display: block; padding: 7px 20px;
+      color: var(--text); text-decoration: none; font-size: 14px;
+      border-left: 3px solid transparent;
+      transition: all .15s;
+    }
+    .sidebar a:hover { background: var(--bg); color: var(--accent); border-left-color: var(--accent); }
+
+    /* ── 主內容 ── */
+    .main { margin-left: 240px; padding: 40px 48px; max-width: 900px; }
+
+    h1 { font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    h2 { font-size: 20px; font-weight: 700; color: var(--accent); margin: 40px 0 14px;
+         padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+    h3 { font-size: 16px; font-weight: 700; color: var(--text); margin: 24px 0 10px; }
+    p  { margin-bottom: 14px; }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 5px; }
+
+    .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+
+    /* ── 標籤 ── */
+    .tag {
+      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; margin-right: 4px;
+    }
+    .tag-blue   { background: var(--tag-blue);  color: var(--accent); }
+    .tag-green  { background: var(--tag-green); color: #27ae60; }
+    .tag-red    { background: var(--tag-red);   color: var(--warn); }
+    .tag-gray   { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── 卡片 ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 24px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; margin-bottom: 4px;
+    }
+    .card-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+    /* ── 練習卡片 ── */
+    .ex-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .ex-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px;
+      border-top: 4px solid var(--accent);
+    }
+    .ex-card.green  { border-top-color: var(--accent2); }
+    .ex-card.orange { border-top-color: #f39c12; }
+    .ex-card.red    { border-top-color: var(--warn); }
+    .ex-num  { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .ex-title { font-size: 17px; font-weight: 700; margin: 4px 0 8px; }
+    .ex-desc  { font-size: 13px; color: var(--muted); }
+
+    /* ── 腳位表格 ── */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; }
+    th { background: var(--bg); text-align: left; padding: 10px 14px; border: 1px solid var(--border); font-weight: 600; }
+    td { padding: 9px 14px; border: 1px solid var(--border); }
+    tr:hover td { background: var(--bg); }
+
+    /* ── 程式碼區塊 ── */
+    pre {
+      background: var(--code-bg); color: var(--code-fg);
+      border-radius: 8px; padding: 18px 20px;
+      font-size: 13px; line-height: 1.6;
+      overflow-x: auto; margin-bottom: 18px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    code {
+      background: var(--bg); padding: 2px 6px; border-radius: 4px;
+      font-size: 13px; font-family: 'SF Mono', 'Consolas', monospace;
+      border: 1px solid var(--border);
+    }
+    pre code { background: none; padding: 0; border: none; font-size: inherit; }
+
+    /* ── 提示框 ── */
+    .callout {
+      padding: 14px 18px; border-radius: 8px;
+      margin-bottom: 18px; font-size: 14px;
+      border-left: 4px solid;
+    }
+    .callout-info  { background: var(--tag-blue);  border-color: var(--accent);  color: #154360; }
+    .callout-tip   { background: var(--tag-green); border-color: var(--accent2); color: #145a32; }
+    .callout-warn  { background: var(--tag-red);   border-color: var(--warn);    color: #641e16; }
+    .callout strong { display: inline-block; margin-bottom: 3px; }
+
+    /* ── 章節分隔 ── */
+    .section-divider { border: none; border-top: 2px solid var(--border); margin: 40px 0; }
+
+    /* ── 響應式 ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 24px 20px; }
+      .ex-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ────────────────── 側邊欄 ────────────────── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    smhs_IoT_Robot
+    <span>課程說明文件</span>
+  </div>
+
+  <div class="nav-section">快速導覽</div>
+  <a href="#overview">系統總覽</a>
+  <a href="#hardware">硬體規格</a>
+  <a href="#pinmap">腳位對照表</a>
+  <a href="#library">函式庫說明</a>
+
+  <div class="nav-section">練習程式</div>
+  <a href="#ex01">練習 01 · DHT11 溫濕度</a>
+  <a href="#ex02">練習 02 · 雨水感測</a>
+  <a href="#ex03">練習 03 · 光照感測</a>
+  <a href="#ex04">練習 04 · 車體控制</a>
+
+  <div class="nav-section">進階</div>
+  <a href="#advanced">公版完整程式說明</a>
+  <a href="#faq">常見問題</a>
+</nav>
+
+<!-- ────────────────── 主內容 ────────────────── -->
+<main class="main">
+
+  <!-- 標題 -->
+  <h1>smhs_IoT_Robot 課程說明文件</h1>
+  <p class="page-subtitle">IoT 機器人實驗課 &nbsp;·&nbsp; ESP32 麥克納姆輪車平台</p>
+
+  <!-- ══════════════ 系統總覽 ══════════════ -->
+  <h2 id="overview">系統總覽</h2>
+
+  <p>
+    <strong>smhs_IoT_Robot</strong> 是一個以 <strong>ESP32</strong> 為核心的 IoT 機器人平台，
+    結合麥克納姆輪四驅底盤、多種環境感測器與 WiFi 無線控制，
+    讓學生透過循序漸進的練習，掌握嵌入式系統與物聯網的核心概念。
+  </p>
+
+  <div class="ex-grid">
+    <div class="ex-card">
+      <div class="ex-num">核心</div>
+      <div class="ex-title">ESP32 雙核心</div>
+      <div class="ex-desc">Xtensa LX6 × 2，240 MHz，內建 WiFi/藍牙，4 MB Flash</div>
+    </div>
+    <div class="ex-card green">
+      <div class="ex-num">移動</div>
+      <div class="ex-title">麥克納姆輪底盤</div>
+      <div class="ex-desc">四輪獨立驅動，支援前後左右橫移及斜向八方向移動</div>
+    </div>
+    <div class="ex-card orange">
+      <div class="ex-num">感測</div>
+      <div class="ex-title">三種環境感測器</div>
+      <div class="ex-desc">DHT11 溫濕度、雨水模組 (數位)、光敏電阻模組 (類比)</div>
+    </div>
+    <div class="ex-card red">
+      <div class="ex-num">通訊</div>
+      <div class="ex-title">WiFi 網頁控制</div>
+      <div class="ex-desc">內建 WebServer，手機瀏覽器即可開啟儀表板與遙控搖桿</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 硬體規格 ══════════════ -->
+  <h2 id="hardware">硬體規格</h2>
+
+  <div class="card">
+    <div class="card-title">板載元件一覽</div>
+    <div class="card-subtitle">smhs_IoT_Robot 主控板上的固定元件</div>
+    <table>
+      <tr><th>元件</th><th>型號 / 規格</th><th>說明</th></tr>
+      <tr><td>主控晶片</td><td>ESP32 (Xtensa LX6 雙核心)</td><td>負責所有運算、WiFi 與馬達控制</td></tr>
+      <tr><td>馬達驅動</td><td>L298N 雙橋電路 × 2</td><td>驅動四顆直流馬達 (M1 ~ M4)</td></tr>
+      <tr><td>狀態指示燈</td><td>WS2812B 全彩 LED × 1</td><td>可程式化 RGB 顯示系統狀態</td></tr>
+      <tr><td>蜂鳴器</td><td>被動式蜂鳴器</td><td>可播放音調與旋律</td></tr>
+      <tr><td>電壓偵測</td><td>電阻分壓 → GPIO 36</td><td>監控電池電量</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">擴充感測器一覽</div>
+    <div class="card-subtitle">本課程使用的外接感測器模組</div>
+    <table>
+      <tr><th>感測器</th><th>模組型號</th><th>輸出類型</th><th>接線腳位</th></tr>
+      <tr><td>溫濕度</td><td>DHT11</td><td>單線數位協定</td><td>GPIO 4</td></tr>
+      <tr><td>雨水偵測</td><td>X0100 MTARDRAIN 114 (或同類)</td><td>數位 (HIGH/LOW)</td><td>GPIO 27</td></tr>
+      <tr><td>光照度</td><td>光敏電阻模組</td><td>類比 (0 ~ 3.3V)</td><td>GPIO 34</td></tr>
+    </table>
+  </div>
+
+  <!-- ══════════════ 腳位對照表 ══════════════ -->
+  <h2 id="pinmap">腳位對照表</h2>
+
+  <div class="callout callout-warn">
+    <strong>⚠️ 注意</strong><br>
+    GPIO 34、35、36、39 為 ESP32 的「純輸入腳」，只能讀取，不能輸出高低電位！
+    光照感測器的類比腳 (GPIO 34) 不需要也不能設定 <code>pinMode</code> 為 OUTPUT。
+  </div>
+
+  <table>
+    <tr><th>GPIO</th><th>功能</th><th>方向</th><th>備註</th></tr>
+    <tr><td><strong>14</strong></td><td>馬達 M1 - A 相</td><td>輸出 (PWM)</td><td>左前輪</td></tr>
+    <tr><td><strong>32</strong></td><td>馬達 M1 - B 相</td><td>輸出 (PWM)</td><td>左前輪</td></tr>
+    <tr><td><strong>12</strong></td><td>馬達 M2 - A 相</td><td>輸出 (PWM)</td><td>右前輪</td></tr>
+    <tr><td><strong>33</strong></td><td>馬達 M2 - B 相</td><td>輸出 (PWM)</td><td>右前輪</td></tr>
+    <tr><td><strong>25</strong></td><td>馬達 M3 - A 相</td><td>輸出 (PWM)</td><td>左後輪</td></tr>
+    <tr><td><strong>26</strong></td><td>馬達 M3 - B 相</td><td>輸出 (PWM)</td><td>左後輪</td></tr>
+    <tr><td><strong>23</strong></td><td>馬達 M4 - A 相</td><td>輸出 (PWM)</td><td>右後輪</td></tr>
+    <tr><td><strong>22</strong></td><td>馬達 M4 - B 相</td><td>輸出 (PWM)</td><td>右後輪</td></tr>
+    <tr><td><strong>2</strong></td><td>WS2812B 狀態 LED</td><td>輸出 (數位)</td><td>全彩指示燈</td></tr>
+    <tr><td><strong>15</strong></td><td>蜂鳴器</td><td>輸出 (PWM)</td><td>被動式蜂鳴器</td></tr>
+    <tr><td><strong>36</strong></td><td>電池電壓偵測</td><td>輸入 (類比)</td><td>純輸入腳</td></tr>
+    <tr><td><strong>4</strong></td><td>DHT11 溫濕度</td><td>雙向 (單線協定)</td><td>練習 01</td></tr>
+    <tr><td><strong>27</strong></td><td>雨水感測 (數位)</td><td>輸入 (數位)</td><td>練習 02</td></tr>
+    <tr><td><strong>34</strong></td><td>光照感測 (類比)</td><td>輸入 (類比)</td><td>練習 03，純輸入腳</td></tr>
+  </table>
+
+  <!-- ══════════════ 函式庫說明 ══════════════ -->
+  <h2 id="library">函式庫說明</h2>
+
+  <p>所有硬體物件都定義在函式庫的 <code>src/smhs_IoT_Robot.h</code> 中。使用 Arduino IDE 匯入 ZIP 程式庫後，在程式最頂端加入：</p>
+
+  <pre><code>#include &lt;smhs_IoT_Robot.h&gt;</code></pre>
+
+  <div class="card">
+    <div class="card-title">Motor — 單顆馬達控制</div>
+    <pre><code>Motor m1(PIN_A, PIN_B);        // 建立馬達物件，傳入兩個 PWM 腳位
+m1.act(Motor::CW,  600);       // 順時針轉，速度 600 (0~1023)
+m1.act(Motor::CCW, 600);       // 逆時針轉
+m1.stop();                     // 煞車停止</code></pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">GoSUMO — 四輪麥克納姆輪車控制</div>
+    <pre><code>// 先建立四顆馬達，再傳入 GoSUMO
+Motor m1(SMHS_HW::M1A, SMHS_HW::M1B);
+Motor m2(SMHS_HW::M2A, SMHS_HW::M2B);
+Motor m3(SMHS_HW::M3A, SMHS_HW::M3B);
+Motor m4(SMHS_HW::M4A, SMHS_HW::M4B);
+GoSUMO robot(&m1, &m2, &m3, &m4);
+
+robot.act(GoSUMO::FORWARD,      570);  // 前進
+robot.act(GoSUMO::BACKWARD,     570);  // 後退
+robot.act(GoSUMO::TURN_LEFT,    570);  // 原地左轉
+robot.act(GoSUMO::TURN_RIGHT,   570);  // 原地右轉
+robot.act(GoSUMO::STRAFE_LEFT,  570);  // 左橫移
+robot.act(GoSUMO::STRAFE_RIGHT, 570);  // 右橫移
+robot.stop();                          // 全部煞車</code></pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">stateLED — WS2812B 全彩狀態指示燈</div>
+    <pre><code>stateLED robotLED(SMHS_HW::WSLED, 1);  // 腳位 2，共 1 顆 LED
+robotLED.begin();                       // 初始化 (在 setup 中呼叫)
+
+robotLED.fillColor(stateLED::RED);      // 全亮紅色
+robotLED.fillColor(stateLED::GREEN);    // 全亮綠色
+robotLED.fillColor(stateLED::BLUE);     // 全亮藍色
+robotLED.fillColor(stateLED::YELLOW);   // 全亮黃色
+robotLED.fillColor(stateLED::OFF);      // 關閉</code></pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SMHS_HW — 硬體腳位常數命名空間</div>
+    <pre><code>// 直接用名稱代替數字，程式更易讀
+SMHS_HW::M1A   // GPIO 14 (馬達 M1 A 相)
+SMHS_HW::WSLED // GPIO 2  (狀態 LED)
+SMHS_HW::BUZZER// GPIO 15 (蜂鳴器)
+SMHS_HW::BATTERY// GPIO 36 (電池偵測)</code></pre>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 練習 01 ══════════════ -->
+  <h2 id="ex01">練習 01 · DHT11 溫濕度感測器</h2>
+
+  <p>
+    <span class="tag tag-blue">難度：★☆☆</span>
+    <span class="tag tag-gray">檔案：examples/ex01_DHT11/ex01_DHT11.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>認識 DHT11 溫濕度感測器的接線方式與工作原理</li>
+    <li>學習使用 <code>DHT</code> 函式庫的 <code>readTemperature()</code> 與 <code>readHumidity()</code></li>
+    <li>學習用 <code>isnan()</code> 檢查感測器是否正常回傳數值</li>
+    <li>認識非阻斷式計時 (<code>millis()</code>)，不使用 <code>delay()</code> 定時讀取</li>
+  </ul>
+
+  <h3>接線方式</h3>
+  <table>
+    <tr><th>DHT11 腳位</th><th>ESP32 腳位</th><th>說明</th></tr>
+    <tr><td>VCC</td><td>3.3V</td><td>電源供電</td></tr>
+    <tr><td>DATA</td><td>GPIO 4</td><td>資料訊號</td></tr>
+    <tr><td>GND</td><td>GND</td><td>共地</td></tr>
+  </table>
+
+  <h3>重要觀念</h3>
+  <div class="callout callout-warn">
+    <strong>⚠️ DHT11 最快讀取速率限制</strong><br>
+    DHT11 每次讀取後需要至少 <strong>2 秒</strong>的冷卻時間。
+    若讀取頻率太快，函式會回傳 <code>NaN</code>（無效數字）。
+    程式中以 <code>READ_INTERVAL = 2000</code> 毫秒確保不超頻讀取。
+  </div>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>// 讀取溫濕度
+float h = dht.readHumidity();
+float t = dht.readTemperature();
+
+// isnan() 檢查是否為無效數值
+if (isnan(h) || isnan(t)) {
+  Serial.println("DHT11 讀取失敗！");
+  return;  // 直接跳出，不更新數值
+}
+
+temperature = t;
+humidity = h;</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>💡 延伸挑戰</strong><br>
+    試著加入判斷：當溫度超過 30°C 時，讓狀態 LED 變成紅色；低於 25°C 時變成藍色。
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 練習 02 ══════════════ -->
+  <h2 id="ex02">練習 02 · 雨水感測器 (數位輸入)</h2>
+
+  <p>
+    <span class="tag tag-blue">難度：★☆☆</span>
+    <span class="tag tag-gray">檔案：examples/ex02_Rain/ex02_Rain.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>認識數位感測器的工作原理：只輸出 <code>HIGH</code> 或 <code>LOW</code> 兩種狀態</li>
+    <li>學習使用 <code>pinMode()</code> 設定腳位為輸入，及 <code>digitalRead()</code> 讀取狀態</li>
+    <li>理解「Active Low」設計邏輯：有水 → LOW；無水 → HIGH</li>
+    <li>學習使用感測器模組上的旋鈕調整靈敏度（觸發臨界值）</li>
+  </ul>
+
+  <h3>接線方式</h3>
+  <table>
+    <tr><th>雨水模組腳位</th><th>ESP32 腳位</th><th>說明</th></tr>
+    <tr><td>VCC</td><td>3.3V</td><td>電源供電</td></tr>
+    <tr><td>DO (數位輸出)</td><td>GPIO 27</td><td>數位感測訊號</td></tr>
+    <tr><td>GND</td><td>GND</td><td>共地</td></tr>
+  </table>
+
+  <div class="callout callout-info">
+    <strong>ℹ️ 什麼是 Active Low？</strong><br>
+    雨水模組在「偵測到水分」時輸出 LOW（0），「乾燥」時輸出 HIGH（1）。
+    這與直覺相反，程式中用 <code>isRaining = (rawValue == LOW)</code> 處理這個邏輯反轉。
+  </div>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>// 設定腳位為數位輸入
+pinMode(PIN_RAIN, INPUT);
+
+// 讀取數位值 (回傳 HIGH=1 或 LOW=0)
+int rawValue = digitalRead(PIN_RAIN);
+
+// Active Low：LOW = 有雨；HIGH = 無雨
+bool isRaining = (rawValue == LOW);</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>💡 延伸挑戰</strong><br>
+    試著結合 LED 燈效：偵測到有雨時 LED 閃爍藍色，無雨時維持綠色。
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 練習 03 ══════════════ -->
+  <h2 id="ex03">練習 03 · 光照感測器 (類比輸入)</h2>
+
+  <p>
+    <span class="tag tag-blue">難度：★★☆</span>
+    <span class="tag tag-gray">檔案：examples/ex03_Light/ex03_Light.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>認識類比感測器的輸出特性：數值範圍 0 ~ 4095（12-bit ADC）</li>
+    <li>學習使用 <code>analogRead()</code> 讀取電壓變化</li>
+    <li>學習使用 <code>map()</code> 函式進行數值線性換算</li>
+    <li>學習使用 <code>constrain()</code> 防止數值超出合理範圍</li>
+    <li>理解 GPIO 34 等腳位為「純輸入」，不可用於輸出</li>
+  </ul>
+
+  <h3>接線方式</h3>
+  <table>
+    <tr><th>光敏電阻模組腳位</th><th>ESP32 腳位</th><th>說明</th></tr>
+    <tr><td>VCC</td><td>3.3V</td><td>電源供電</td></tr>
+    <tr><td>AO (類比輸出)</td><td>GPIO 34</td><td>類比光照訊號</td></tr>
+    <tr><td>GND</td><td>GND</td><td>共地</td></tr>
+  </table>
+
+  <h3>重要觀念：ADC 解析度</h3>
+  <div class="callout callout-info">
+    <strong>ℹ️ ESP32 的 ADC 解析度</strong><br>
+    ESP32 的類比數位轉換器 (ADC) 解析度為 <strong>12 位元</strong>，
+    即輸入電壓 0V ~ 3.3V 對應數值 <strong>0 ~ 4095</strong>。<br>
+    光線越強 → 光敏電阻阻值越低 → 分壓越高 → ADC 數值越大（越亮）。
+  </div>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>// 讀取類比值 (0 ~ 4095)
+int lightRaw = analogRead(PIN_LIGHT);
+
+// map(數值, 輸入最小, 輸入最大, 輸出最小, 輸出最大)
+// 將 0~4095 線性換算為 0~100 的百分比
+int lightPct = map(lightRaw, 0, 4095, 0, 100);
+
+// constrain 確保結果不超出 0~100
+lightPct = constrain(lightPct, 0, 100);</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>💡 延伸挑戰</strong><br>
+    試著加入自動夜燈功能：當光照強度低於 20% 時，讓 LED 亮白燈；超過 20% 時自動關閉。
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 練習 04 ══════════════ -->
+  <h2 id="ex04">練習 04 · 網頁車體控制</h2>
+
+  <p>
+    <span class="tag tag-blue">難度：★★★</span>
+    <span class="tag tag-gray">檔案：examples/ex04_RobotControl/ex04_RobotControl.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>認識 <code>GoSUMO</code> 類別的四輪麥克納姆輪控制方法</li>
+    <li>理解 WiFi 網頁搖桿如何透過 <strong>HTTP GET + AJAX</strong> 傳送指令</li>
+    <li>理解「看門狗 (Watchdog)」機制的設計原理與必要性</li>
+    <li>認識 <code>volatile</code> 關鍵字在多工/中斷環境中的作用</li>
+  </ul>
+
+  <h3>網頁搖桿通訊流程</h3>
+  <div class="card">
+    <div class="card-title">指令傳遞架構</div>
+    <pre style="margin-bottom:0;"><code>手機瀏覽器 ─── HTTP GET /cmd?dir=F ──→ ESP32 WebServer
+                                        ↓
+                                   handleCommand()
+                                        ↓
+                                   robot.act(FORWARD, speed)
+                                        ↓
+                                   馬達 M1~M4 啟動</code></pre>
+  </div>
+
+  <h3>看門狗機制說明</h3>
+  <div class="callout callout-info">
+    <strong>ℹ️ 為什麼需要看門狗？</strong><br>
+    網頁搖桿透過 WiFi 傳送指令。若 WiFi 突然斷線，車子會繼續以最後收到的指令行駛，
+    造成失控！<br><br>
+    解決方法：讓搖桿「按住」時每 250ms 自動重送一次心跳訊號。
+    ESP32 如果連續 <strong>500ms</strong> 沒收到訊號，看門狗判定連線中斷，強制煞車。
+  </div>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>// loop() 中的看門狗邏輯
+if (isMoving && (currentTime - lastCmdTime > CMD_TIMEOUT)) {
+  robot.stop();     // 強制煞車
+  isMoving = false;
+  Serial.println("看門狗觸發：超時自動煞車！");
+}
+
+// 收到指令時更新心跳時間
+lastCmdTime = millis();  // 重置看門狗計時器</code></pre>
+
+  <pre><code>// 網頁 JavaScript 的心跳連發邏輯
+function startCmd(d){
+  fetch('/cmd?dir='+d);  // 立即發送
+  // 每 250ms 重送一次，維持「按住」狀態
+  moveInterval = setInterval(()=>{ fetch('/cmd?dir='+d); }, 250);
+}
+function stopCmd(){
+  clearInterval(moveInterval);  // 停止連發
+  fetch('/cmd?dir=S');           // 發送煞車指令
+}</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>💡 延伸挑戰</strong><br>
+    試著加入橫移功能：在搖桿介面新增「左橫移」和「右橫移」按鈕，
+    使用 <code>GoSUMO::STRAFE_LEFT</code> 和 <code>GoSUMO::STRAFE_RIGHT</code>。
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 公版完整程式 ══════════════ -->
+  <h2 id="advanced">公版完整程式說明 (smhs_IoT_Robot)</h2>
+
+  <p>
+    公版程式 <code>examples/smhs_IoT_Robot/smhs_IoT_Robot.ino</code> 整合了所有練習的功能，
+    並採用更進階的 <strong>FreeRTOS 雙核心架構</strong>，徹底解決 WiFi 傳輸與馬達控制互相干擾的問題。
+  </p>
+
+  <div class="card">
+    <div class="card-title">雙核心分工架構</div>
+    <table>
+      <tr><th>核心</th><th>負責任務</th><th>特性</th></tr>
+      <tr>
+        <td><strong>Core 1</strong><br>(預設 loop)</td>
+        <td>• 馬達控制<br>• 看門狗煞車<br>• 感測器定時讀取<br>• GPS 資料接收</td>
+        <td>高速、零延遲<br>不受 WiFi 干擾</td>
+      </tr>
+      <tr>
+        <td><strong>Core 0</strong><br>(NetworkTask)</td>
+        <td>• WiFi 連線管理<br>• WebServer 監聽<br>• ThingSpeak 上傳<br>• LED 狀態更新</td>
+        <td>背景執行<br>耗時不影響馬達</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">公版程式額外功能</div>
+    <ul style="margin:0;">
+      <li><strong>GPS 定位</strong>：透過 TinyGPSPlus 函式庫解析 NMEA 衛星訊號</li>
+      <li><strong>ThingSpeak 雲端上傳</strong>：可將感測器數值定時上傳至 IoT 雲端平台</li>
+      <li><strong>完整感測儀表板</strong>：溫濕度、光照、雨水、GPS 整合在同一網頁</li>
+      <li><strong>非同步 AJAX 更新</strong>：網頁數值自動刷新，不需重新載入整頁</li>
+    </ul>
+  </div>
+
+  <h3>程式架構說明</h3>
+  <pre><code>// 公版程式的雙核心啟動方式
+void setup() {
+  // ... 硬體初始化 ...
+
+  // 將網路相關任務指派給 Core 0
+  xTaskCreatePinnedToCore(
+    networkTaskCode,  // 任務函式
+    "NetworkTask",    // 任務名稱
+    10000,            // 記憶體大小 (Stack)
+    NULL,             // 傳遞參數
+    1,                // 優先級
+    &NetworkTask,     // 任務指針
+    0                 // 指定 Core 0 執行
+  );
+  // setup() 結束後，Arduino 的 loop() 自動在 Core 1 執行
+}</code></pre>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 常見問題 ══════════════ -->
+  <h2 id="faq">常見問題</h2>
+
+  <div class="card">
+    <div class="card-title">Q：燒錄後 Serial 沒有任何輸出？</div>
+    <p>請確認 Serial 監控視窗的鮑率設定為 <strong>115200</strong>，與程式中 <code>Serial.begin(115200)</code> 一致。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Q：WiFi 一直無法連線？</div>
+    <ul>
+      <li>確認 <code>ssid</code> 和 <code>password</code> 拼寫正確（區分大小寫）。</li>
+      <li>ESP32 <strong>只支援 2.4 GHz</strong> 頻段，不支援 5 GHz。手機熱點請確認設為 2.4 GHz。</li>
+      <li>若使用手機熱點，確認熱點已開啟且在訊號範圍內。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Q：DHT11 Serial 顯示讀取失敗？</div>
+    <ul>
+      <li>確認 DATA 腳接在 GPIO 4，且有正確接地與供電 (3.3V)。</li>
+      <li>確認程式中 <code>READ_INTERVAL</code> 設定為 2000 毫秒以上。</li>
+      <li>部分劣質 DHT11 需在 DATA 與 VCC 之間接一顆 10kΩ 上拉電阻。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Q：光照感測器數值始終是 0 或 4095？</div>
+    <ul>
+      <li>確認訊號腳接在 GPIO 34（類比輸入），而非 GPIO 27（數位輸入）。</li>
+      <li>部分光敏電阻模組有 <strong>AO（類比）</strong> 和 <strong>DO（數位）</strong> 兩個輸出腳，請確認使用的是 AO。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Q：網頁搖桿按鈕沒有反應，馬達不動？</div>
+    <ul>
+      <li>確認手機/電腦與 ESP32 在<strong>同一個 WiFi 網路</strong>下。</li>
+      <li>確認在瀏覽器輸入的 IP 位址正確（從 Serial 監控視窗複製）。</li>
+      <li>確認電池電量充足，馬達需要較大電流，USB 單獨供電可能不夠。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Q：車子自己停下來，沒有在控制的時候也會動？</div>
+    <p>這是正常的「看門狗」保護機制。按住搖桿按鈕時，瀏覽器每 250ms 自動送出心跳訊號維持移動；
+    放開後發送煞車指令，若網路延遲超過 500ms 看門狗也會自動煞車。</p>
+  </div>
+
+  <br><br>
+  <p style="text-align:center;color:var(--muted);font-size:13px;">
+    smhs_IoT_Robot 課程說明文件 &nbsp;·&nbsp; 如有問題請詢問老師
+  </p>
+  <br>
+
+</main>
+</body>
+</html>
