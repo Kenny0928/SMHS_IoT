@@ -164,10 +164,14 @@
   <a href="#library">函式庫說明</a>
 
   <div class="nav-section">練習程式</div>
-  <a href="#ex01">練習 01 · DHT11 溫濕度</a>
-  <a href="#ex02">練習 02 · 雨水感測</a>
-  <a href="#ex03">練習 03 · 光照感測</a>
-  <a href="#ex04">練習 04 · 車體控制</a>
+  <a href="#ex00">練習 00 · WS2812B 狀態燈</a>
+  <a href="#ex01">練習 01 · 光敏電阻序列埠</a>
+  <a href="#ex02">練習 02 · ThingSpeak 上傳</a>
+  <a href="#ex03">練習 03 · DHT11 溫濕度</a>
+  <a href="#ex04">練習 04 · 雨水感測</a>
+  <a href="#ex05">練習 05 · 光照感測</a>
+  <a href="#ex06">練習 06 · 車體控制</a>
+  <a href="#ex07">練習 07 · 馬達接線測試</a>
 
   <div class="nav-section">進階</div>
   <a href="#advanced">公版完整程式說明</a>
@@ -262,9 +266,9 @@
     <tr><td><strong>2</strong></td><td>WS2812B 狀態 LED</td><td>輸出 (數位)</td><td>全彩指示燈</td></tr>
     <tr><td><strong>15</strong></td><td>蜂鳴器</td><td>輸出 (PWM)</td><td>被動式蜂鳴器</td></tr>
     <tr><td><strong>36</strong></td><td>電池電壓偵測</td><td>輸入 (類比)</td><td>純輸入腳</td></tr>
-    <tr><td><strong>4</strong></td><td>DHT11 溫濕度</td><td>雙向 (單線協定)</td><td>練習 01</td></tr>
-    <tr><td><strong>27</strong></td><td>雨水感測 (數位)</td><td>輸入 (數位)</td><td>練習 02</td></tr>
-    <tr><td><strong>34</strong></td><td>光照感測 (類比)</td><td>輸入 (類比)</td><td>練習 03，純輸入腳</td></tr>
+    <tr><td><strong>4</strong></td><td>DHT11 溫濕度</td><td>雙向 (單線協定)</td><td>練習 03</td></tr>
+    <tr><td><strong>27</strong></td><td>雨水感測 (數位)</td><td>輸入 (數位)</td><td>練習 04</td></tr>
+    <tr><td><strong>34</strong></td><td>光照感測 (類比)</td><td>輸入 (類比)</td><td>練習 05，純輸入腳</td></tr>
   </table>
 
   <!-- ══════════════ 函式庫說明 ══════════════ -->
@@ -289,14 +293,24 @@ Motor m1(SMHS_HW::M1A, SMHS_HW::M1B);
 Motor m2(SMHS_HW::M2A, SMHS_HW::M2B);
 Motor m3(SMHS_HW::M3A, SMHS_HW::M3B);
 Motor m4(SMHS_HW::M4A, SMHS_HW::M4B);
-GoSUMO robot(&m1, &m2, &m3, &m4);
+GoSUMO robot(&amp;m1, &amp;m2, &amp;m3, &amp;m4);
 
+// 基礎運動
 robot.act(GoSUMO::FORWARD,      570);  // 前進
 robot.act(GoSUMO::BACKWARD,     570);  // 後退
 robot.act(GoSUMO::TURN_LEFT,    570);  // 原地左轉
 robot.act(GoSUMO::TURN_RIGHT,   570);  // 原地右轉
+
+// 橫移 (麥克納姆輪特有)
 robot.act(GoSUMO::STRAFE_LEFT,  570);  // 左橫移
 robot.act(GoSUMO::STRAFE_RIGHT, 570);  // 右橫移
+
+// 斜向運動 (麥克納姆輪特有)
+robot.act(GoSUMO::DIAG_FL,      570);  // 前左斜向
+robot.act(GoSUMO::DIAG_FR,      570);  // 前右斜向
+robot.act(GoSUMO::DIAG_BL,      570);  // 後左斜向
+robot.act(GoSUMO::DIAG_BR,      570);  // 後右斜向
+
 robot.stop();                          // 全部煞車</code></pre>
   </div>
 
@@ -304,12 +318,56 @@ robot.stop();                          // 全部煞車</code></pre>
     <div class="card-title">stateLED — WS2812B 全彩狀態指示燈</div>
     <pre><code>stateLED robotLED(SMHS_HW::WSLED, 1);  // 腳位 2，共 1 顆 LED
 robotLED.begin();                       // 初始化 (在 setup 中呼叫)
+robotLED.setBrightness(60);            // 設定亮度 (0~255，建議 40~100)
 
-robotLED.fillColor(stateLED::RED);      // 全亮紅色
-robotLED.fillColor(stateLED::GREEN);    // 全亮綠色
-robotLED.fillColor(stateLED::BLUE);     // 全亮藍色
-robotLED.fillColor(stateLED::YELLOW);   // 全亮黃色
-robotLED.fillColor(stateLED::OFF);      // 關閉</code></pre>
+// 全部 LED 同色 (最常用)
+robotLED.fillColor(stateLED::RED);      // 紅色 (錯誤、攻擊、低電量)
+robotLED.fillColor(stateLED::GREEN);    // 綠色 (安全、待機、就緒)
+robotLED.fillColor(stateLED::BLUE);     // 藍色 (運行中)
+robotLED.fillColor(stateLED::YELLOW);   // 黃色 (警告)
+robotLED.fillColor(stateLED::PURPLE);   // 紫色 (特殊模式)
+robotLED.fillColor(stateLED::CYAN);     // 青色 (自訂狀態)
+robotLED.fillColor(stateLED::WHITE);    // 白色 (照明、啟動)
+robotLED.fillColor(stateLED::OFF);      // 關閉
+
+// 自訂 RGB 顏色
+robotLED.fill(255, 128, 0);            // 直接指定 R, G, B 值 (0~255)
+
+// 關閉所有 LED
+robotLED.clear();
+
+// 單顆控制 (多 LED 時使用)
+robotLED.setColor(0, stateLED::RED);            // 第 0 顆 → 紅色
+robotLED.setPixel(0, 255, 128, 0);             // 第 0 顆 → 自訂 RGB</code></pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Buzzer — 被動式蜂鳴器控制</div>
+    <pre><code>Buzzer buzzer(SMHS_HW::BUZZER);   // 建立蜂鳴器物件，傳入腳位
+
+// 基礎發聲
+buzzer.tone(1000);                 // 發出 1000 Hz 音調 (持續到 noTone)
+buzzer.tone(1000, 200);            // 發出 1000 Hz，音量 200 (0~255)
+buzzer.noTone();                   // 停止發聲
+
+// 警報音
+buzzer.alarm();                    // 發出警報音效
+
+// 內建系統音效 (非阻斷式，需在 loop() 搭配 update() 呼叫)
+buzzer.soundBoot();                // 開機音效
+buzzer.soundConnect();             // 連線成功
+buzzer.soundError();               // 錯誤警告
+buzzer.soundNotify();              // 提醒音效
+buzzer.soundAttack();              // 攻擊/警報
+
+// 播放自訂旋律 (需在 loop() 中持續呼叫 update())
+Note melody[] = {
+  {Pitch::Do_4, 300}, {Pitch::Mi_4, 300}, {Pitch::Sol_4, 600}
+};
+buzzer.playMelody(melody, 3);
+
+// ⚠️ 使用背景播放時，必須在 loop() 中呼叫：
+buzzer.update();</code></pre>
   </div>
 
   <div class="card">
@@ -323,12 +381,186 @@ SMHS_HW::BATTERY// GPIO 36 (電池偵測)</code></pre>
 
   <hr class="section-divider">
 
+  <!-- ══════════════ 練習 00 ══════════════ -->
+  <h2 id="ex00">練習 00 · WS2812B 狀態指示燈</h2>
+
+  <p>
+    <span class="tag tag-green">難度：★☆☆</span>
+    <span class="tag tag-gray">檔案：examples/ex00_WS2812B/ex00_WS2812B.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>認識 WS2812B 全彩 LED 的特性：只需一條數位訊號線即可控制顏色</li>
+    <li>學習使用 <code>stateLED</code> 類別的 <code>fillColor()</code>、<code>clear()</code> 與 <code>setBrightness()</code></li>
+    <li>練習以 <code>delay()</code> 控制燈效時間序列（入門版計時方式）</li>
+  </ul>
+
+  <h3>重要觀念</h3>
+  <div class="callout callout-info">
+    <strong>ℹ️ WS2812B 與一般 LED 的差異</strong><br>
+    普通 LED 只能控制亮滅；WS2812B 是「智慧型」LED，內建驅動晶片，
+    透過單一腳位的串列訊號即可獨立控制每顆 LED 的紅、綠、藍三色強度（各 0~255），
+    理論上可混合出 1600 萬種顏色。
+  </div>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>#include &lt;smhs_IoT_Robot.h&gt;
+
+stateLED led(SMHS_HW::WSLED, 1);  // 腳位 2，共 1 顆 LED
+
+void setup() {
+  led.begin();
+  led.setBrightness(60);  // 亮度設 60，避免太亮刺眼 (0~255)
+}
+
+void loop() {
+  led.fillColor(stateLED::RED);   // 亮紅色
+  delay(500);
+  led.clear();                    // 熄滅
+  delay(500);
+
+  led.fillColor(stateLED::GREEN); // 亮綠色
+  delay(500);
+  led.clear();
+  delay(500);
+
+  led.fillColor(stateLED::BLUE);  // 亮藍色
+  delay(500);
+  led.clear();
+  delay(500);
+}</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>💡 延伸挑戰</strong><br>
+    試著加入 <code>YELLOW</code>、<code>PURPLE</code>、<code>CYAN</code>、<code>WHITE</code> 等顏色，
+    或用 <code>led.fill(r, g, b)</code> 自訂 RGB 數值，做出漸變燈效。
+  </div>
+
+  <hr class="section-divider">
+
   <!-- ══════════════ 練習 01 ══════════════ -->
-  <h2 id="ex01">練習 01 · DHT11 溫濕度感測器</h2>
+  <h2 id="ex01">練習 01 · 光敏電阻序列埠讀值</h2>
+
+  <p>
+    <span class="tag tag-green">難度：★☆☆</span>
+    <span class="tag tag-gray">檔案：examples/ex01_LightSerial/ex01_LightSerial.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>認識類比感測器的基本用法：<code>analogRead()</code> 讀取電壓轉換後的數值</li>
+    <li>學習使用 <code>Serial.println()</code> 將數值輸出到序列埠監控視窗</li>
+    <li>理解 ESP32 ADC 12-bit 解析度：數值範圍 0 ~ 4095</li>
+    <li>練習觀察感測器的實際數值範圍，為後續的 <code>map()</code> 換算打基礎</li>
+  </ul>
+
+  <h3>接線方式</h3>
+  <table>
+    <tr><th>光敏電阻模組腳位</th><th>ESP32 腳位</th><th>說明</th></tr>
+    <tr><td>VCC</td><td>3.3V</td><td>電源供電</td></tr>
+    <tr><td>AO (類比輸出)</td><td>GPIO 34</td><td>類比光照訊號</td></tr>
+    <tr><td>GND</td><td>GND</td><td>共地</td></tr>
+  </table>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>const int PIN_LIGHT = 34;
+
+void setup() {
+  Serial.begin(115200);  // 開啟序列埠，鮑率 115200
+}
+
+void loop() {
+  int value = analogRead(PIN_LIGHT);  // 讀取 0~4095 的數值
+  Serial.println(value);              // 印到序列埠監控視窗
+  delay(500);                         // 每 0.5 秒讀一次
+}</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>💡 操作技巧</strong><br>
+    打開 Arduino IDE 的「序列埠繪圖家」（Serial Plotter）取代序列埠監控視窗，
+    可以即時看到數值的折線圖，用手遮住感測器或打燈觀察數值變化更直覺！
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 練習 02 ══════════════ -->
+  <h2 id="ex02">練習 02 · 光敏電阻資料上傳 ThingSpeak</h2>
+
+  <p>
+    <span class="tag tag-blue">難度：★★☆</span>
+    <span class="tag tag-gray">檔案：examples/ex02_LightThingSpeak/ex02_LightThingSpeak.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>學習 ESP32 連接 WiFi 的基本流程</li>
+    <li>認識 ThingSpeak IoT 雲端平台，了解如何用 HTTP GET 上傳感測器資料</li>
+    <li>學習使用 <code>HTTPClient</code> 函式庫發送 HTTP 請求</li>
+    <li>學習用狀態 LED 顯示連線狀態（紅 = 連線中、綠 = 連線成功、藍 = 上傳中）</li>
+    <li>理解用 <code>millis()</code> 控制上傳間隔（ThingSpeak 免費版最快每 15 秒一次）</li>
+  </ul>
+
+  <h3>事前準備</h3>
+  <div class="callout callout-info">
+    <strong>ℹ️ 取得 ThingSpeak API Key</strong><br>
+    1. 前往 <strong>thingspeak.com</strong> 註冊帳號<br>
+    2. 建立新 Channel，記下 <strong>Write API Key</strong><br>
+    3. 將程式中的 <code>writeApiKey</code> 替換為你的 Key，<code>ssid</code> / <code>password</code> 填入 WiFi 資訊
+  </div>
+
+  <h3>LED 狀態說明</h3>
+  <table>
+    <tr><th>LED 顏色</th><th>代表狀態</th></tr>
+    <tr><td>🔴 紅色</td><td>WiFi 連線中 / 斷線重連中</td></tr>
+    <tr><td>🟢 綠色</td><td>WiFi 已連線，等待下次上傳</td></tr>
+    <tr><td>🔵 藍色</td><td>資料上傳至 ThingSpeak 中</td></tr>
+  </table>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>// WiFi 連線
+WiFi.begin(ssid, password);
+while (WiFi.status() != WL_CONNECTED) { delay(500); }
+
+// HTTP GET 上傳資料
+void uploadLight(int value) {
+  HTTPClient http;
+  String url = "http://api.thingspeak.com/update?api_key=";
+  url += writeApiKey;
+  url += "&amp;field1=" + String(value);
+
+  http.begin(url);
+  int code = http.GET();  // 回傳 > 0 表示上傳成功
+  http.end();
+}
+
+// loop() 中以 millis() 控制上傳頻率
+if (millis() - lastUploadTime &gt;= UPLOAD_INTERVAL) {
+  lastUploadTime = millis();
+  uploadLight(analogRead(PIN_LIGHT));
+}</code></pre>
+
+  <div class="callout callout-warn">
+    <strong>⚠️ ThingSpeak 上傳限制</strong><br>
+    ThingSpeak 免費帳號要求每次上傳間隔至少 <strong>15 秒</strong>。
+    程式中 <code>UPLOAD_INTERVAL = 20000</code>（20 秒）是合理的設定值。
+    若上傳太頻繁，ThingSpeak 會回傳 <code>0</code> 表示拒絕。
+  </div>
+
+  <div class="callout callout-tip">
+    <strong>💡 延伸挑戰</strong><br>
+    試著同時上傳溫濕度資料到 field2、field3：
+    在 URL 後加入 <code>&amp;field2=溫度&amp;field3=濕度</code>，並在 ThingSpeak 的 Channel 設定中啟用對應欄位。
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 練習 03 ══════════════ -->
+  <h2 id="ex03">練習 03 · DHT11 溫濕度感測器</h2>
 
   <p>
     <span class="tag tag-blue">難度：★☆☆</span>
-    <span class="tag tag-gray">檔案：examples/ex01_DHT11/ex01_DHT11.ino</span>
+    <span class="tag tag-gray">檔案：examples/ex03_DHT11/ex03_DHT11.ino</span>
   </p>
 
   <h3>學習目標</h3>
@@ -376,12 +608,12 @@ humidity = h;</code></pre>
 
   <hr class="section-divider">
 
-  <!-- ══════════════ 練習 02 ══════════════ -->
-  <h2 id="ex02">練習 02 · 雨水感測器 (數位輸入)</h2>
+  <!-- ══════════════ 練習 04 ══════════════ -->
+  <h2 id="ex04">練習 04 · 雨水感測器 (數位輸入)</h2>
 
   <p>
     <span class="tag tag-blue">難度：★☆☆</span>
-    <span class="tag tag-gray">檔案：examples/ex02_Rain/ex02_Rain.ino</span>
+    <span class="tag tag-gray">檔案：examples/ex04_Rain/ex04_Rain.ino</span>
   </p>
 
   <h3>學習目標</h3>
@@ -423,12 +655,12 @@ bool isRaining = (rawValue == LOW);</code></pre>
 
   <hr class="section-divider">
 
-  <!-- ══════════════ 練習 03 ══════════════ -->
-  <h2 id="ex03">練習 03 · 光照感測器 (類比輸入)</h2>
+  <!-- ══════════════ 練習 05 ══════════════ -->
+  <h2 id="ex05">練習 05 · 光照感測器 (類比輸入)</h2>
 
   <p>
     <span class="tag tag-blue">難度：★★☆</span>
-    <span class="tag tag-gray">檔案：examples/ex03_Light/ex03_Light.ino</span>
+    <span class="tag tag-gray">檔案：examples/ex05_Light/ex05_Light.ino</span>
   </p>
 
   <h3>學習目標</h3>
@@ -474,12 +706,12 @@ lightPct = constrain(lightPct, 0, 100);</code></pre>
 
   <hr class="section-divider">
 
-  <!-- ══════════════ 練習 04 ══════════════ -->
-  <h2 id="ex04">練習 04 · 網頁車體控制</h2>
+  <!-- ══════════════ 練習 06 ══════════════ -->
+  <h2 id="ex06">練習 06 · 網頁車體控制</h2>
 
   <p>
     <span class="tag tag-blue">難度：★★★</span>
-    <span class="tag tag-gray">檔案：examples/ex04_RobotControl/ex04_RobotControl.ino</span>
+    <span class="tag tag-gray">檔案：examples/ex06_RobotControl/ex06_RobotControl.ino</span>
   </p>
 
   <h3>學習目標</h3>
@@ -513,7 +745,7 @@ lightPct = constrain(lightPct, 0, 100);</code></pre>
 
   <h3>關鍵程式碼說明</h3>
   <pre><code>// loop() 中的看門狗邏輯
-if (isMoving && (currentTime - lastCmdTime > CMD_TIMEOUT)) {
+if (isMoving &amp;&amp; (currentTime - lastCmdTime > CMD_TIMEOUT)) {
   robot.stop();     // 強制煞車
   isMoving = false;
   Serial.println("看門狗觸發：超時自動煞車！");
@@ -537,6 +769,58 @@ function stopCmd(){
     <strong>💡 延伸挑戰</strong><br>
     試著加入橫移功能：在搖桿介面新增「左橫移」和「右橫移」按鈕，
     使用 <code>GoSUMO::STRAFE_LEFT</code> 和 <code>GoSUMO::STRAFE_RIGHT</code>。
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════ 練習 07 ══════════════ -->
+  <h2 id="ex07">練習 07 · 馬達接線前進測試</h2>
+
+  <p>
+    <span class="tag tag-blue">難度：★☆☆</span>
+    <span class="tag tag-gray">檔案：examples/ex07_MotorForwardTest/ex07_MotorForwardTest.ino</span>
+  </p>
+
+  <h3>學習目標</h3>
+  <ul>
+    <li>確認 M1、M2、M3、M4 四顆馬達是否接在正確位置</li>
+    <li>確認每顆馬達 A/B 線方向是否能讓車體往前移動</li>
+    <li>學會用 <code>GoSUMO::FORWARD</code> 做最基本的車體動作測試</li>
+  </ul>
+
+  <div class="callout callout-warn">
+    <strong>安全提醒</strong><br>
+    燒錄後請先架高車體或讓輪子離地。程式倒數 3 秒後會持續前進，
+    確認方向正確後再放到地面測試。
+  </div>
+
+  <h3>測試判斷方式</h3>
+  <table>
+    <tr><th>觀察到的狀況</th><th>可能原因</th><th>建議檢查</th></tr>
+    <tr><td>車體穩定向前</td><td>接線位置與方向正確</td><td>可進入網頁遙控測試</td></tr>
+    <tr><td>車體後退</td><td>左右兩側馬達方向整體相反</td><td>檢查馬達 A/B 線方向</td></tr>
+    <tr><td>原地旋轉</td><td>左、右側其中一側方向相反</td><td>檢查左右輪馬達接線</td></tr>
+    <tr><td>斜向或明顯歪斜</td><td>單顆馬達位置或方向錯誤</td><td>逐一檢查 M1~M4 插座位置</td></tr>
+  </table>
+
+  <h3>關鍵程式碼說明</h3>
+  <pre><code>// 測試速度 (0 ~ 1023)，建議先用低速
+const int TEST_SPEED = 520;
+
+// 建立四顆馬達與車體物件
+Motor m1(SMHS_HW::M1A, SMHS_HW::M1B);
+Motor m2(SMHS_HW::M2A, SMHS_HW::M2B);
+Motor m3(SMHS_HW::M3A, SMHS_HW::M3B);
+Motor m4(SMHS_HW::M4A, SMHS_HW::M4B);
+GoSUMO robot(&amp;m1, &amp;m2, &amp;m3, &amp;m4);
+
+// 倒數結束後開始前進
+robot.act(GoSUMO::FORWARD, TEST_SPEED);</code></pre>
+
+  <div class="callout callout-info">
+    <strong>判斷重點</strong><br>
+    這個範例只做「持續前進」一件事。如果車體沒有直直往前，
+    先修正馬達插座位置與 A/B 線方向，再進行練習 06 的網頁遙控。
   </div>
 
   <hr class="section-divider">
@@ -588,7 +872,7 @@ void setup() {
     10000,            // 記憶體大小 (Stack)
     NULL,             // 傳遞參數
     1,                // 優先級
-    &NetworkTask,     // 任務指針
+    &amp;NetworkTask,     // 任務指針
     0                 // 指定 Core 0 執行
   );
   // setup() 結束後，Arduino 的 loop() 自動在 Core 1 執行
