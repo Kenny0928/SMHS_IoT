@@ -21,8 +21,8 @@
 
 // ==================== 2. 宣告區 ====================
 // --- 網路與 IoT 設定 ---
-const char* ssid = "Kenny";
-const char* password = "a8524567913";
+const char* ssid = "Kenny"; // 你的 WiFi SSID
+const char* password = "a8524567913"; // 你的 WiFi 密碼
 const char* device_id = "ROBOT-001";
 
 // --- ThingSpeak 上傳設定 ---
