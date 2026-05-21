@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">機電整合韌體架構圖</title>
+  <desc id="desc">以四層方式說明 SMHS IoT Robot 的韌體架構：硬體腳位層、驅動封裝層、應用邏輯層、通訊與介面層。</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f9fc; }
+      .title { fill: #1f2937; font: 700 42px "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; }
+      .subtitle { fill: #5b6472; font: 400 20px "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; }
+      .layer { stroke-width: 2; rx: 20; }
+      .layer-title { fill: #111827; font: 700 28px "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; }
+      .layer-caption { fill: #4b5563; font: 400 18px "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; }
+      .code { fill: #243142; font: 600 20px "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+      .note { fill: #374151; font: 500 19px "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; }
+      .small { fill: #64748b; font: 400 15px "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; }
+      .arrow { fill: none; stroke: #7b8794; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .badge-text { fill: #ffffff; font: 700 18px "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif; }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#7b8794" />
+    </marker>
+    <filter id="softShadow" x="-8%" y="-18%" width="116%" height="136%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#1f2937" flood-opacity="0.10" />
+    </filter>
+  </defs>
+
+  <rect class="bg" width="1200" height="900" />
+
+  <text class="title" x="600" y="72" text-anchor="middle">不要害怕機電整合</text>
+  <text class="subtitle" x="600" y="110" text-anchor="middle">把複雜的機器人，拆成四個清楚的韌體層次</text>
+
+  <g filter="url(#softShadow)">
+    <rect class="layer" x="140" y="155" width="920" height="130" fill="#ffffff" stroke="#c9d6e6" />
+    <circle cx="190" cy="220" r="27" fill="#2563eb" />
+    <text class="badge-text" x="190" y="227" text-anchor="middle">1</text>
+    <text class="layer-title" x="235" y="200">硬體腳位層</text>
+    <text class="layer-caption" x="235" y="232">先確認每個零件接在哪個 GPIO，建立硬體對應表。</text>
+    <text class="code" x="235" y="263">SMHS_HW::M1A / WSLED / BUZZER / BATTERY</text>
+
+    <path class="arrow" d="M600 300 L600 330" marker-end="url(#arrowhead)" />
+
+    <rect class="layer" x="140" y="345" width="920" height="130" fill="#ffffff" stroke="#b8dfce" />
+    <circle cx="190" cy="410" r="27" fill="#16a34a" />
+    <text class="badge-text" x="190" y="417" text-anchor="middle">2</text>
+    <text class="layer-title" x="235" y="390">驅動封裝層</text>
+    <text class="layer-caption" x="235" y="422">把底層控制包成好用的物件，不需要每次重寫硬體細節。</text>
+    <text class="code" x="235" y="453">Motor / GoSUMO / stateLED / Buzzer / IR3CH / HCSR04 / Power</text>
+
+    <path class="arrow" d="M600 490 L600 520" marker-end="url(#arrowhead)" />
+
+    <rect class="layer" x="140" y="535" width="920" height="150" fill="#ffffff" stroke="#f2d19b" />
+    <circle cx="190" cy="610" r="27" fill="#f59e0b" />
+    <text class="badge-text" x="190" y="617" text-anchor="middle">3</text>
+    <text class="layer-title" x="235" y="584">應用邏輯層</text>
+    <text class="layer-caption" x="235" y="616">決定機器人什麼時候初始化、讀感測器、移動、煞車或上傳資料。</text>
+    <text class="code" x="235" y="649">setup() 初始化 / loop() 重複執行</text>
+    <text class="code" x="235" y="674">readSensors() / handleCommand() / uploadData()</text>
+
+    <path class="arrow" d="M600 700 L600 730" marker-end="url(#arrowhead)" />
+
+    <rect class="layer" x="140" y="745" width="920" height="110" fill="#ffffff" stroke="#d8c7f4" />
+    <circle cx="190" cy="800" r="27" fill="#7c3aed" />
+    <text class="badge-text" x="190" y="807" text-anchor="middle">4</text>
+    <text class="layer-title" x="235" y="784">通訊與介面層</text>
+    <text class="layer-caption" x="235" y="816">讓人可以觀察、控制機器人，並把資料送到網路服務。</text>
+    <text class="code" x="235" y="846">Serial Monitor / WiFi / WebServer / AJAX / ThingSpeak</text>
+  </g>
+
+  <g>
+    <rect x="310" y="126" width="580" height="3" rx="1.5" fill="#d7dee8" />
+    <rect x="185" y="870" width="830" height="1" fill="#dde5ef" />
+    <text class="note" x="600" y="892" text-anchor="middle">AI 輔助：協助拆解、查錯、改寫與驗證，但核心仍是先知道自己正在處理哪一層。</text>
+  </g>
+</svg>
